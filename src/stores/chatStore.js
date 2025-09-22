@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import { persist, createJSONStorage } from 'zustand/middleware'
 
 export const useChatStore = create((set, get) => ({
   // State
@@ -38,25 +37,41 @@ export const useChatStore = create((set, get) => ({
 
   addMessage: (roomId, message) => set((state) => {
     const roomMessages = state.messages[roomId] || []
-    const messageExists = roomMessages.some(m => 
-      m.streamId === message.streamId || 
-      (m.tempId && m.tempId === message.tempId)
-    )
     
-    if (messageExists) {
-      // Update existing message
+    // 메시지 고유 식별자 확인 (더 엄격한 조건)
+    const existingMessageIndex = roomMessages.findIndex(m => {
+      // streamId가 있는 경우 streamId로 비교
+      if (message.streamId && m.streamId) {
+        return m.streamId === message.streamId
+      }
+      // tempId가 있는 경우 tempId로 비교 (같은 tempId인 경우만)
+      if (message.tempId && m.tempId) {
+        return m.tempId === message.tempId
+      }
+      // id가 있는 경우 id로 비교
+      if (message.id && m.id) {
+        return m.id === message.id
+      }
+      return false
+    })
+    
+    if (existingMessageIndex !== -1) {
+      // 기존 메시지 업데이트
+      const updatedMessages = [...roomMessages]
+      updatedMessages[existingMessageIndex] = {
+        ...updatedMessages[existingMessageIndex],
+        ...message,
+        tempId: message.streamId ? undefined : updatedMessages[existingMessageIndex].tempId
+      }
+      
       return {
         messages: {
           ...state.messages,
-          [roomId]: roomMessages.map(m => 
-            (m.streamId === message.streamId || m.tempId === message.tempId) 
-              ? { ...m, ...message, tempId: undefined } 
-              : m
-          )
+          [roomId]: updatedMessages
         }
       }
     } else {
-      // Add new message
+      // 새 메시지 추가
       return {
         messages: {
           ...state.messages,

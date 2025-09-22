@@ -99,10 +99,20 @@ const ChatPage = () => {
   const setupWebSocketSubscriptions = () => {
     // 메시지 구독
     websocketService.subscribeToRoom(parseInt(roomId), (messageData) => {
-      addMessage(parseInt(roomId), {
+      // 서버에서 받은 메시지에는 고유한 streamId나 id가 있어야 함
+      const processedMessage = {
         ...messageData,
-        timestamp: new Date(messageData.timestamp)
-      })
+        timestamp: new Date(messageData.timestamp),
+        id: messageData.id || messageData.streamId || uuidv4() // 고유 ID 보장
+      }
+      
+      // 내가 보낸 메시지인지 확인 (중복 방지)
+      if (processedMessage.senderId === user.id) {
+        // 임시 메시지를 실제 메시지로 교체
+        processedMessage.status = 'DELIVERED'
+      }
+      
+      addMessage(parseInt(roomId), processedMessage)
     })
 
     // 참여자 업데이트 구독
@@ -159,16 +169,21 @@ const ChatPage = () => {
       timestamp: new Date()
     }
 
-    // 즉시 UI에 메시지 추가 (임시)
-    addMessage(parseInt(roomId), messageData)
+    // 즉시 UI에 메시지 추가 (임시 - tempId 사용)
+    addMessage(parseInt(roomId), {
+      ...messageData,
+      id: tempId // 임시 ID로 사용
+    })
 
-    // WebSocket으로 메시지 전송
-    const success = websocketService.sendMessage(parseInt(roomId), messageData)
+    // WebSocket으로 메시지 전송 (tempId는 전송하지 않음)
+    const { tempId: _, ...sendData } = messageData
+    const success = websocketService.sendMessage(parseInt(roomId), sendData)
 
     if (!success) {
       // 전송 실패시 상태 업데이트
       addMessage(parseInt(roomId), {
         ...messageData,
+        id: tempId,
         status: 'FAILED'
       })
     }
