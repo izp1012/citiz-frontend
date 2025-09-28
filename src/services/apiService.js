@@ -16,7 +16,7 @@ class ApiService {
         'Content-Type': 'application/json',
         ...getAuthHeader(),
         ...getUserIdHeader(),
-        ...options.headers,
+        ...options.headers
       },
       ...options,
     }
@@ -26,7 +26,7 @@ class ApiService {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
+        throw new Error(errorData.msg || `HTTP error! status: ${response.status}`)
       }
 
       const contentType = response.headers.get('content-type')

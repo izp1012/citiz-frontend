@@ -35,51 +35,41 @@ export const useChatStore = create((set, get) => ({
     messages: { ...state.messages, [roomId]: messages }
   })),
 
-  addMessage: (roomId, message) => set((state) => {
-    const roomMessages = state.messages[roomId] || []
-    
-    // 메시지 고유 식별자 확인 (더 엄격한 조건)
-    const existingMessageIndex = roomMessages.findIndex(m => {
-      // streamId가 있는 경우 streamId로 비교
-      if (message.streamId && m.streamId) {
-        return m.streamId === message.streamId
-      }
-      // tempId가 있는 경우 tempId로 비교 (같은 tempId인 경우만)
-      if (message.tempId && m.tempId) {
-        return m.tempId === message.tempId
-      }
-      // id가 있는 경우 id로 비교
-      if (message.id && m.id) {
-        return m.id === message.id
-      }
-      return false
-    })
-    
-    if (existingMessageIndex !== -1) {
-      // 기존 메시지 업데이트
-      const updatedMessages = [...roomMessages]
-      updatedMessages[existingMessageIndex] = {
-        ...updatedMessages[existingMessageIndex],
-        ...message,
-        tempId: message.streamId ? undefined : updatedMessages[existingMessageIndex].tempId
-      }
+  addOrUpdateMessage: (roomId, message, type) => {
+    set((state) => {
+      const roomMessages = state.messages[roomId] || [];
       
-      return {
-        messages: {
-          ...state.messages,
-          [roomId]: updatedMessages
+      if (type === 'update') {
+        const updatedMessages = roomMessages.map(msg => 
+          (msg.tempId && msg.tempId === message.tempId) || (msg.streamId && msg.streamId === message.streamId)
+          ? { ...msg, ...message }
+          : msg
+      );
+        return {
+          messages: {
+            ...state.messages,
+            [roomId]: updatedMessages,
+          },
+        };
+      } else if (type === 'new') {
+        // 중복 메시지 방지를 위해 streamId와 tempId 모두 확인
+        const messageExists = roomMessages.some(msg => 
+          (msg.tempId && msg.tempId === message.tempId) || (msg.streamId && msg.streamId === message.streamId)
+        );
+        if (messageExists) {
+            console.warn("Message with this ID already exists, not adding:", message.tempId);
+            return state;
         }
+        return {
+          messages: {
+            ...state.messages,
+            [roomId]: [...roomMessages, message],
+          },
+        };
       }
-    } else {
-      // 새 메시지 추가
-      return {
-        messages: {
-          ...state.messages,
-          [roomId]: [...roomMessages, message]
-        }
-      }
-    }
-  }),
+      return state;
+    });
+  },
 
   updateMessageStatus: (roomId, messageId, status) => set((state) => ({
     messages: {

@@ -1,11 +1,11 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './stores/authStore'
-import LoginPage from './pages/LoginPage'
+import LoginPage from './pages/LoginPage.jsx'
 import MainPage from './pages/MainPage.jsx'
-import ChatPage from './pages/ChatPage'
-import ChatListPage from './pages/ChatListPage'
-import Navigation from './components/Navigation'
+import ChatPage from './pages/ChatPage.jsx'
+import ChatListPage from './pages/ChatListPage.jsx'
+import Navigation from './components/Navigation.jsx'
 import './styles/globals.css'
 
 function App() {
