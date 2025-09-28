@@ -25,7 +25,8 @@ const ChatPage = () => {
     currentRoom,
     setCurrentRoom,
     getRoomMessages,
-    addMessage,
+    addOrUpdateMessage,
+    addTempMessage,
     setMessages,
     isConnected
   } = useChatStore()
@@ -98,21 +99,14 @@ const ChatPage = () => {
 
   const setupWebSocketSubscriptions = () => {
     // 메시지 구독
-    websocketService.subscribeToRoom(parseInt(roomId), (messageData) => {
+    websocketService.subscribeToRoom(parseInt(roomId), (messageData, actionType) => {
       // 서버에서 받은 메시지에는 고유한 streamId나 id가 있어야 함
       const processedMessage = {
         ...messageData,
-        timestamp: new Date(messageData.timestamp),
-        id: messageData.id || messageData.streamId || uuidv4() // 고유 ID 보장
+        timestamp: new Date(messageData.timestamp)
       }
       
-      // 내가 보낸 메시지인지 확인 (중복 방지)
-      if (processedMessage.senderId === user.id) {
-        // 임시 메시지를 실제 메시지로 교체
-        processedMessage.status = 'DELIVERED'
-      }
-      
-      addMessage(parseInt(roomId), processedMessage)
+      addOrUpdateMessage(parseInt(roomId), processedMessage, actionType);
     })
 
     // 참여자 업데이트 구독
@@ -124,7 +118,7 @@ const ChatPage = () => {
   const handleParticipantUpdate = (participantData) => {
     if (participantData.type === 'JOIN') {
       // 입장 알림 메시지 추가
-      addMessage(parseInt(roomId), {
+      addOrUpdateMessage(parseInt(roomId), {
         id: `system-${Date.now()}`,
         content: `${participantData.userName}님이 입장했습니다.`,
         type: 'SYSTEM',
@@ -134,7 +128,7 @@ const ChatPage = () => {
       })
     } else if (participantData.type === 'LEAVE') {
       // 퇴장 알림 메시지 추가
-      addMessage(parseInt(roomId), {
+      addOrUpdateMessage(parseInt(roomId), {
         id: `system-${Date.now()}`,
         content: `${participantData.userName}님이 퇴장했습니다.`,
         type: 'SYSTEM',
@@ -155,37 +149,12 @@ const ChatPage = () => {
 
   const handleSendMessage = (e) => {
     e.preventDefault()
-    if (!message.trim() || !websocketService.isConnected()) return
+    if (!message.trim() || !websocketService.isConnected()) return;
 
-    const tempId = uuidv4()
-    const messageData = {
-      tempId,
-      roomId: parseInt(roomId),
-      senderId: user.id,
-      senderName: user.name,
-      content: message.trim(),
-      type: 'CHAT',
-      status: 'SENDING',
-      timestamp: new Date()
-    }
-
-    // 즉시 UI에 메시지 추가 (임시 - tempId 사용)
-    addMessage(parseInt(roomId), {
-      ...messageData,
-      id: tempId // 임시 ID로 사용
-    })
-
-    // WebSocket으로 메시지 전송 (tempId는 전송하지 않음)
-    const { tempId: _, ...sendData } = messageData
-    const success = websocketService.sendMessage(parseInt(roomId), sendData)
-
-    if (!success) {
-      // 전송 실패시 상태 업데이트
-      addMessage(parseInt(roomId), {
-        ...messageData,
-        id: tempId,
-        status: 'FAILED'
-      })
+    const tempMessage = websocketService.sendMessage(parseInt(roomId), message.trim());
+    if (tempMessage) {
+      // 2. 반환받은 임시 메시지 객체를 그대로 UI에 추가
+      addOrUpdateMessage(parseInt(roomId), tempMessage, 'new');
     }
 
     setMessage('')
@@ -204,7 +173,7 @@ const ChatPage = () => {
     }
 
     typingTimeoutRef.current = setTimeout(() => {
-      handleTypingStop()
+    handleTypingStop()
     }, 2000)
   }
 
@@ -320,7 +289,7 @@ const ChatPage = () => {
           </div>
         ) : (
           messages.map((msg, index) => (
-            <div key={msg.id || msg.tempId || index}>
+            <div key={msg.streamId || msg.tempId}> 
               {msg.type === 'SYSTEM' ? (
                 <div className="text-center">
                   <span className="bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-sm">

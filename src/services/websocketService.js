@@ -10,6 +10,12 @@ class WebSocketService {
     this.maxReconnectAttempts = 5
     this.reconnectDelay = 1000
     this.subscriptions = new Map()
+    this.pendingMessages = new Map() // 임시 메시지 저장
+  }
+
+  // 임시 ID 생성 함수
+  generateTempId() {
+    return 'temp-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9)
   }
 
   connect() {
@@ -20,7 +26,7 @@ class WebSocketService {
       console.error('User not authenticated')
       return Promise.reject('User not authenticated')
     }
-
+    
     return new Promise((resolve, reject) => {
       try {
         // SockJS를 사용하여 WebSocket 연결 설정
@@ -36,7 +42,7 @@ class WebSocketService {
           },
           debug: (str) => {
             if (!import.meta.env.PROD) {
-              console.log('STOMP Debug:', str)
+              // console.log('STOMP Debug:', str)
             }
           },
           reconnectDelay: this.reconnectDelay,
@@ -137,7 +143,8 @@ class WebSocketService {
       const subscription = this.client.subscribe(topic, (message) => {
         try {
           const messageData = JSON.parse(message.body)
-          onMessageReceived(messageData)
+          // 임시 메시지 처리 로직
+          this.handleIncomingMessage(messageData, onMessageReceived)
         } catch (error) {
           console.error('Failed to parse message:', error)
         }
@@ -150,6 +157,36 @@ class WebSocketService {
     } catch (error) {
       console.error(`Failed to subscribe to room ${roomId}:`, error)
       return null
+    }
+  }
+
+  // 수신된 메시지 처리 (중복 제거 로직 포함)
+  handleIncomingMessage(messageData, onMessageReceived) {
+    const { user } = useAuthStore.getState()
+    
+    // 본인이 보낸 메시지이고 tempId가 있는 경우 (임시 메시지가 존재하는 경우)
+    if (messageData.senderId === user.id && messageData.tempId && this.pendingMessages.has(messageData.tempId)) {
+      const tempMessage = this.pendingMessages.get(messageData.tempId)
+      
+      // 임시 메시지를 실제 메시지로 업데이트
+      const updatedMessage = {
+        ...tempMessage,
+        ...messageData,
+        status: 'DELIVERED',
+        messageId: messageData.messageId,
+        streamId: messageData.streamId
+      }
+      
+      // 임시 메시지 제거
+      this.pendingMessages.delete(messageData.tempId)
+      
+      // 업데이트된 메시지로 UI 갱신
+      onMessageReceived(updatedMessage, 'update')
+      
+      console.log('Updated temp message to real message:', updatedMessage)
+    } else {
+      // 다른 사람의 메시지이거나 tempId가 없는 경우 새로 추가
+      onMessageReceived(messageData, 'new')
     }
   }
 
@@ -201,26 +238,105 @@ class WebSocketService {
     })
   }
 
-  sendMessage(roomId, messageData) {
+  sendMessage(roomId, messageContent, onTempMessageCreated) {
     if (!this.client || !this.client.connected) {
       console.error('WebSocket not connected')
       return false
     }
 
+    const { user } = useAuthStore.getState()
+    const tempId = this.generateTempId()
+    
+    // 임시 메시지 생성
+    const tempMessage = {
+      tempId: tempId,
+      roomId: parseInt(roomId),
+      senderId: user.id,
+      senderName: user.name || `User_${user.id}`,
+      content: messageContent,
+      type: 'CHAT',
+      status: 'SENDING',
+      timestamp: new Date().toISOString()
+    }
+
+    // 임시 메시지를 저장하고 UI에 즉시 표시
+    this.pendingMessages.set(tempId, tempMessage)
+
     try {
+      // 서버로 메시지 전송 (tempId 포함)
+      const messageData = {
+        tempId: tempId,
+        senderId: user.id,
+        senderName: user.name || `User_${user.id}`,
+        content: messageContent,
+        type: 'CHAT'
+      }
+
       this.client.publish({
         destination: `/app/chat/send/${roomId}`,
         body: JSON.stringify(messageData),
         headers: {
           'content-type': 'application/json',
-          'User-Id': useAuthStore.getState().user.id.toString()
+          'User-Id': user.id.toString()
         }
       })
       
-      console.log('Message sent:', messageData)
-      return true
+      console.log('Message sent with tempId:', tempId)
+      return tempMessage
     } catch (error) {
       console.error('Failed to send message:', error)
+      
+      // 전송 실패 시 임시 메시지 상태를 실패로 변경
+      if (this.pendingMessages.has(tempId)) {
+        const failedMessage = {
+          ...tempMessage,
+          status: 'FAILED'
+        }
+        this.pendingMessages.set(tempId, failedMessage);
+
+        return { ...failedMessage, id: tempId }; // 실패 메시지 객체 반환
+      }
+      
+      return false
+    }
+  }
+
+   // 메시지 재전송 함수
+   retryMessage(tempId) {
+    const tempMessage = this.pendingMessages.get(tempId)
+    if (!tempMessage) {
+      console.error('Temp message not found:', tempId)
+      return false
+    }
+
+    // 상태를 다시 SENDING으로 변경
+    tempMessage.status = 'SENDING'
+    this.pendingMessages.set(tempId, tempMessage)
+
+    try {
+      const messageData = {
+        tempId: tempId,
+        senderId: tempMessage.senderId,
+        senderName: tempMessage.senderName,
+        content: tempMessage.content,
+        type: tempMessage.type
+      }
+
+      this.client.publish({
+        destination: `/app/chat/send/${tempMessage.roomId}`,
+        body: JSON.stringify(messageData),
+        headers: {
+          'content-type': 'application/json',
+          'User-Id': tempMessage.senderId.toString()
+        }
+      })
+
+      console.log('Message retried:', tempId)
+      return true
+    } catch (error) {
+      console.error('Failed to retry message:', error)
+      tempMessage.status = 'FAILED'
+      this.pendingMessages.set(tempId, tempMessage)
       return false
     }
   }
