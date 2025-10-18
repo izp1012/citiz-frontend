@@ -1,6 +1,7 @@
 import { useAuthStore } from '../stores/authStore'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+
 
 class ApiService {
   constructor() {
@@ -10,10 +11,12 @@ class ApiService {
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`
     const { getAuthHeader, getUserIdHeader } = useAuthStore.getState()
+
+    const isFormData = options.body instanceof FormData
     
     const config = {
       headers: {
-        'Content-Type': 'application/json',
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }), // ✅ FormData면 Content-Type 빼기
         ...getAuthHeader(),
         ...getUserIdHeader(),
         ...options.headers
@@ -39,6 +42,10 @@ class ApiService {
       console.error(`API request failed for ${endpoint}:`, error)
       throw error
     }
+  }
+
+  async getPosts() {
+    return this.request('/posts') // 백엔드 엔드포인트에 맞게 조정
   }
 
   // Chat Room APIs
