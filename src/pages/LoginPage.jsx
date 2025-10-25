@@ -1,5 +1,6 @@
+// LoginPage.jsx
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom' // ✅ Link import 추가
 import { useAuthStore } from '../stores/authStore'
 import { MessageCircle, User, Lock, AlertCircle } from 'lucide-react'
 
@@ -49,12 +50,8 @@ const LoginPage = () => {
           <div className="mx-auto h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center animate-bounce-in">
             <MessageCircle className="h-8 w-8 text-white" />
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            Citiz에 로그인
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            소통과 포스팅이 가능한 커뮤니티
-          </p>
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">Citiz에 로그인</h2>
+          <p className="mt-2 text-sm text-gray-600">소통과 포스팅이 가능한 커뮤니티</p>
         </div>
 
         <form className="mt-8 space-y-6 animate-slide-up" onSubmit={handleSubmit}>
@@ -66,7 +63,9 @@ const LoginPage = () => {
               </div>
             )}
 
+            {/* 입력 필드 */}
             <div className="space-y-4">
+              {/* 사용자명 */}
               <div>
                 <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
                   사용자명
@@ -82,12 +81,13 @@ const LoginPage = () => {
                     required
                     value={formData.username}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="사용자명을 입력하세요"
                   />
                 </div>
               </div>
 
+              {/* 비밀번호 */}
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                   비밀번호
@@ -103,43 +103,35 @@ const LoginPage = () => {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="비밀번호를 입력하세요"
                   />
                 </div>
               </div>
             </div>
 
+            {/* 버튼 영역 */}
             <div>
               <button
                 type="submit"
                 disabled={isLoading || !formData.username || !formData.password}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200 ease-in-out transform hover:scale-105"
+                className="w-full py-3 px-4 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition disabled:opacity-50"
               >
-                {isLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-top-transparent"></div>
-                    <span>로그인 중...</span>
-                  </div>
-                ) : (
-                  '로그인'
-                )}
+                {isLoading ? '로그인 중...' : '로그인'}
               </button>
             </div>
 
-            <div className="text-center">
+            {/* ✅ 회원가입 링크 추가 */}
+            <div className="text-center mt-4">
               <p className="text-sm text-gray-600">
-                테스트용 계정: 아무 사용자명과 비밀번호를 입력하세요
+                아직 계정이 없으신가요?{' '}
+                <Link to="/register" className="text-blue-600 hover:underline font-medium">
+                  회원가입
+                </Link>
               </p>
             </div>
           </div>
         </form>
-
-        <div className="text-center">
-          <p className="text-xs text-gray-500">
-            © 2024 Citiz. 모든 권리 보유.
-          </p>
-        </div>
       </div>
     </div>
   )
