@@ -107,6 +107,7 @@ npm run dev
 5. **브라우저에서 확인**
 ```
 http://localhost:3000
+https://citiz-frontend-rf7qs9k1e-thddls0221s-projects.vercel.app/
 ```
 
 ## 📁 프로젝트 구조
@@ -117,10 +118,16 @@ citiz-frontend/
 ├── src/
 │   ├── components/            # 재사용 가능한 컴포넌트
 │   │   └── Navigation.jsx     # 네비게이션 바
+│   │   ├── HeroSection.jsx    # 메인 페이지 히어로 섹션
+│   │   ├── StatsSection.jsx   # 통계 카드 섹션
+│   │   ├── PostCard.jsx       # 게시글 카드 컴포넌트
+│   │   ├── Sidebar.jsx        # 사이드바 (빠른 액세스, 카테고리 등)
+│   │   ├── PostDetail.jsx     # 게시글 상세 페이지
+│   │   └── CommentSection.jsx # 댓글 섹션
 │   ├── pages/                 # 페이지 컴포넌트
 │   │   ├── LoginPage.jsx      # 로그인 페이지
 │   │   ├── MainPage.jsx       # 메인 대시보드 (공간 피드)
-│   │   ├── SpaceDetailPage.jsx# 공간 상세 정보
+│   │   ├── SpaceDetailPage.jsx# 공간 상세 정보 (추후 구현예)
 │   │   ├── ChatListPage.jsx   # 채팅방 목록
 │   │   └── ChatPage.jsx       # 실시간 채팅
 │   ├── services/              # 외부 서비스 연동
@@ -221,19 +228,19 @@ VITE_WS_BASE_URL=https://api.citiz.com/ws/chat
 - [x] 실시간 채팅 시스템
 - [x] 반응형 디자인
 
-### Phase 2: 사용자 경험 향상 (2024 Q2)
+### Phase 2: 사용자 경험 향상 (2025 Q3)
 - [ ] 공간 등록 및 수정 기능
 - [ ] 고급 검색 및 필터링
 - [ ] 사용자 프로필 및 팔로우 시스템
 - [ ] 북마크 및 위시리스트
 
-### Phase 3: 커뮤니티 기능 강화 (2024 Q3)
+### Phase 3: 커뮤니티 기능 강화 (2025 Q4)
 - [ ] 공간 리뷰 및 평점 시스템
 - [ ] 이벤트 및 모임 기능
 - [ ] 포인트 및 리워드 시스템
 - [ ] 소셜 공유 기능
 
-### Phase 4: 고급 기능 (2024 Q4)
+### Phase 4: 고급 기능 (2026 Q1)
 - [ ] AI 기반 개인화 추천
 - [ ] 지도 통합 및 AR 기능
 - [ ] 모바일 앱 개발
