@@ -13,7 +13,7 @@ export const useAuthStore = create(
       login: async (username, password) => {
         try {
           // ✅ 실제 Spring 서버로 로그인 요청 보내기
-          const response = await fetch(`${API_BASE_URL}/users/login`, {
+          const response = await fetch(`${API_BASE_URL}/api/users/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: username, password }),
