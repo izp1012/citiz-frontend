@@ -5,7 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080
 
 class ApiService {
   constructor() {
-    this.baseURL = API_BASE_URL+'/api'
+    this.baseURL = API_BASE_URL
   }
 
   async request(endpoint, options = {}) {
