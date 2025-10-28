@@ -62,9 +62,9 @@ const ChatListPage = () => {
     try {
       const roomData = {
         name: newRoomName.trim(),
-        description: `${user.name}님이 만든 채팅방`,
+        description: `${user.username}님이 만든 채팅방`,
         maxParticipants: 100,
-        isPublic: true
+        isPrivate: false
       }
 
       const newRoom = await apiService.createChatRoom(roomData)
