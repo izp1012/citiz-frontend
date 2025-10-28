@@ -20,13 +20,14 @@ export const useAuthStore = create(
           })
       
           // ✅ JSON 응답 파싱
-          const data = await response.json()
-      
+          const data = await response.json();
+
           if (response.ok && data.code == '1') {
             // ✅ 서버에서 로그인 성공 시 받은 사용자 정보 세팅
             const userData = {
-              username: username,
-              email: `${username}@example.com`,
+              id : data.data.id,
+              username: data.data.name,
+              email: data.data.email,
               avatar: `https://ui-avatars.com/api/?name=${username}&background=3b82f6&color=fff`,
             }
       
@@ -71,7 +72,7 @@ export const useAuthStore = create(
 
       getUserIdHeader: () => {
         const user = get().user
-        return user ? { 'User-Id': user.email.toString() } : {}
+        return user ? { 'User-Id': user.id } : {}
       },
     }),
     {
