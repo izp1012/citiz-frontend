@@ -173,12 +173,12 @@ const MainPage = () => {
   }
 
   const handleAddComment = (content) => {
-    if (!selectedPost) return
+    if (!selectedPost || !user) return
 
     const newComment = {
       id: Date.now(),
-      author: '현재사용자',
-      avatar: 'https://ui-avatars.com/api/?name=현재사용자&background=random',
+      author: user.username,  // 실제 사용자 이름 사용
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`,  // 실제 사용자 이름으로 아바타 생성
       content: content,
       timestamp: '방금 전',
       likes: 0
@@ -210,6 +210,7 @@ const MainPage = () => {
         onAddComment={handleAddComment}
         otherPosts={posts}
         onPostClick={handlePostClick}
+        currentUser={user}  // 현재 사용자 정보 전달
       />
     )
   }
