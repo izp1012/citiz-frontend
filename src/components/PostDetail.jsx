@@ -182,6 +182,7 @@ const PostDetail = ({
             <CommentSection 
               comments={comments} 
               onAddComment={onAddComment}
+              currentUser={currentUser}
             />
           </div>
 

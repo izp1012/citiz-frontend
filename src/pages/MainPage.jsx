@@ -173,12 +173,12 @@ const MainPage = () => {
   }
 
   const handleAddComment = (content) => {
-    if (!selectedPost) return
+    if (!selectedPost || !user) return
 
     const newComment = {
       id: Date.now(),
-      author: '현재사용자',
-      avatar: 'https://ui-avatars.com/api/?name=현재사용자&background=random',
+      author: user.username || '사용자',
+      avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || '사용자')}&background=random`,
       content: content,
       timestamp: '방금 전',
       likes: 0

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Send, Heart } from 'lucide-react'
 
-const CommentSection = ({ comments, onAddComment }) => {
+const CommentSection = ({ comments, onAddComment, currentUser }) => {
   const [newComment, setNewComment] = useState('')
 
   const handleSubmit = () => {
@@ -10,6 +10,9 @@ const CommentSection = ({ comments, onAddComment }) => {
       setNewComment('')
     }
   }
+
+  // 현재 사용자 정보 (기본값 설정)
+  const user = currentUser || { name: '사용자', avatar: 'https://ui-avatars.com/api/?name=User&background=random' }
 
   return (
     <div className="bg-white rounded-2xl shadow-md p-6">
@@ -20,8 +23,8 @@ const CommentSection = ({ comments, onAddComment }) => {
       {/* Comment Input */}
       <div className="flex gap-3 mb-6">
         <img
-          src="https://ui-avatars.com/api/?name=현재사용자&background=random"
-          alt="현재사용자"
+          src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`}
+          alt={user.username}
           className="h-10 w-10 rounded-full"
         />
         <div className="flex-1">
