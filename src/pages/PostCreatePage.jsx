@@ -36,7 +36,7 @@ const PostCreatePage = () => {
     setImages([...images, ...previewFiles])
   }
 
-  // 🔥 이미지 업로드 API (서버에서 URL 반환한다고 가정)
+  //apiservice.uploadFile
   const uploadImages = async () => {
     if (images.length === 0) return []
 
@@ -54,6 +54,8 @@ const PostCreatePage = () => {
     return imgUrls // ["url1", "url2", ...]
   }
 
+  
+
   // 🔥 최종 POST /posts 호출
   const handleSubmit = async () => {
     if (!title.trim() || !content.trim()) {
@@ -69,7 +71,7 @@ const PostCreatePage = () => {
 
       // 👉 2) PostReqDto 구조에 맞춰 JSON 생성
       const reqBody = {
-        profileId: profileId, // TODO: 로그인한 사용자 프로필 ID로 변경
+        profileId: id, // TODO: 로그인한 사용자 프로필 ID로 변경
         postId: null,
         title: title,
         content: content,

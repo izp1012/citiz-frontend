@@ -123,7 +123,7 @@ class ApiService {
     })
   }
 
-  
+
 
   // Error handler for common API errors
   handleError(error) {
