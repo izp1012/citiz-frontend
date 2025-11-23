@@ -21,8 +21,8 @@ export const useAuthStore = create(
           })
       
           // ✅ JSON 응답 파싱
-          const data = await response.json()
-      
+          const data = await response.json();
+
           if (response.ok && data.code == '1') {
             // ✅ 서버에서 로그인 성공 시 받은 사용자 정보 세팅
             const userData = {
@@ -73,7 +73,7 @@ export const useAuthStore = create(
 
       getUserIdHeader: () => {
         const user = get().user
-        return user ? { 'User-Id': user.email.toString() } : {}
+        return user ? { 'User-Id': user.id } : {}
       },
     }),
     {

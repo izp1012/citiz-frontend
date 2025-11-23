@@ -13,7 +13,8 @@ const PostDetail = ({
   comments, 
   onAddComment,
   otherPosts,
-  onPostClick 
+  onPostClick,
+  currentUser
 }) => {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -182,6 +183,7 @@ const PostDetail = ({
             <CommentSection 
               comments={comments} 
               onAddComment={onAddComment}
+              currentUser={currentUser}
             />
           </div>
 
