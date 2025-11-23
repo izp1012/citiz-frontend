@@ -5,21 +5,25 @@ import { apiService } from '../services/apiService'
 
 const RegisterPage = () => {
   const navigate = useNavigate()
+
   const [formData, setFormData] = useState({
     email: '',
     name: '',
     password: '',
     profileImage: null,
   })
+
   const [preview, setPreview] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
+  // 입력 변경
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
+  // 이미지 업로드 선택
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (file) {
@@ -28,6 +32,25 @@ const RegisterPage = () => {
     }
   }
 
+  // 🔥 1) 프로필 이미지 먼저 업로드 → URL 받기
+  const uploadProfileImage = async (file) => {
+    if (!file) return null
+
+    const imgForm = new FormData()
+    imgForm.append("file", file)
+
+    // 필요 시 업로드 경로 수정 (지금은 /upload/profile)
+    const response = await apiService.request('/upload/profile', {
+      method: 'POST',
+      body: imgForm
+    })
+
+    // 서버가 URL을 문자열로 반환한다고 가정
+    const url = await response.text()
+    return url
+  }
+
+  // 🔥 2) 회원가입(JSON) 요청
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
@@ -35,20 +58,32 @@ const RegisterPage = () => {
     setSuccess('')
 
     try {
-      const form = new FormData()
-      form.append('email', formData.email)
-      form.append('name', formData.name)
-      form.append('password', formData.password)
-      if (formData.profileImage) form.append('profileImage', formData.profileImage)
+      // 1) 이미지 업로드 후 URL 받기
+      let profileImageUrl = null
+      if (formData.profileImage) {
+        profileImageUrl = await uploadProfileImage(formData.profileImage)
+      }
 
+      // 2) JSON Body 구성 — @RequestBody로 받을 수 있음
+      const requestBody = {
+        email: formData.email,
+        name: formData.name,
+        password: formData.password,
+        profileImage: profileImageUrl
+      }
+
+      // 3) 실제 회원가입 요청
       await apiService.request('/users', {
         method: 'POST',
-        body: form
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody)
       })
 
       setSuccess('회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.')
       setTimeout(() => navigate('/login'), 1500)
+
     } catch (err) {
+      console.error(err)
       setError('회원가입에 실패했습니다. 다시 시도해주세요.')
     } finally {
       setIsLoading(false)
@@ -68,6 +103,7 @@ const RegisterPage = () => {
 
         <form className="mt-8 space-y-6 animate-slide-up" onSubmit={handleSubmit}>
           <div className="bg-white rounded-xl shadow-lg p-8 space-y-6">
+
             {/* 오류 / 성공 메시지 */}
             {error && (
               <div className="flex items-center space-x-3 text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
@@ -82,8 +118,9 @@ const RegisterPage = () => {
               </div>
             )}
 
-            {/* 입력 필드 */}
             <div className="space-y-4">
+
+              {/* email */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">이메일</label>
                 <div className="relative">
@@ -100,6 +137,7 @@ const RegisterPage = () => {
                 </div>
               </div>
 
+              {/* name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">이름</label>
                 <div className="relative">
@@ -116,6 +154,7 @@ const RegisterPage = () => {
                 </div>
               </div>
 
+              {/* password */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">비밀번호</label>
                 <div className="relative">
@@ -132,7 +171,7 @@ const RegisterPage = () => {
                 </div>
               </div>
 
-              {/* 프로필 이미지 */}
+              {/* profile image */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">프로필 사진</label>
                 <div className="flex items-center space-x-3">

@@ -123,6 +123,8 @@ class ApiService {
     })
   }
 
+  
+
   // Error handler for common API errors
   handleError(error) {
     if (error.message.includes('401') || error.message.includes('Unauthorized')) {
