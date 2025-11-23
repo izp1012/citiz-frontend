@@ -7,7 +7,7 @@ import { useAuthStore } from '../stores/authStore'
 const PostCreatePage = () => {
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const profileId = user?.profileId
+  const id = user?.id
 
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
