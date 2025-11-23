@@ -8,6 +8,7 @@ import ChatListPage from './pages/ChatListPage.jsx'
 import Navigation from './components/Navigation.jsx'
 import './styles/globals.css'
 import RegisterPage from './pages/RegisterPage.jsx'
+import PostCreatePage from './pages/PostCreatePage.jsx'
 
 function App() {
   const { isAuthenticated } = useAuthStore()
@@ -47,6 +48,7 @@ function App() {
               path="/register" 
               element={<RegisterPage />} 
             /> 
+            <Route path="/post/new" element={<PostCreatePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

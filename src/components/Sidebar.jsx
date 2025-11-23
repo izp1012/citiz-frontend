@@ -17,10 +17,13 @@ const Sidebar = () => {
       <div className="bg-white rounded-2xl shadow-md p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">빠른 액세스</h3>
         <div className="space-y-3">
-          <button className="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition duration-200 text-left">
+          <Link
+                to="/post/new"
+                className="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition duration-200 text-left"
+              >
             <Camera className="h-5 w-5 text-blue-600" />
             <span className="text-gray-700 font-medium">새 공간 공유</span>
-          </button>
+          </Link>
           <Link
             to="/chat"
             className="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition duration-200"
