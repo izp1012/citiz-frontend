@@ -17,10 +17,13 @@ const HeroSection = ({ userName }) => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition duration-200 flex items-center justify-center space-x-2 shadow-lg">
+            <Link
+                to="/post/new"
+                className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition duration-200 flex items-center justify-center space-x-2 shadow-lg"
+            >
               <Camera className="h-5 w-5" />
               <span>공간 공유하기</span>
-            </button>
+            </Link>
             <Link
               to="/chat"
               className="bg-blue-800 text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-900 transition duration-200 flex items-center justify-center space-x-2 shadow-lg"
