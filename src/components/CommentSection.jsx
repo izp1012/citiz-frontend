@@ -1,7 +1,11 @@
 import React, { useState } from 'react'
 import { Send, Heart } from 'lucide-react'
 
+<<<<<<< HEAD
 const CommentSection = ({ comments = [], onAddComment, currentUser }) => {
+=======
+const CommentSection = ({ comments, onAddComment, currentUser }) => {
+>>>>>>> be9337ba9e7ad4e919d0fecc52ff8fbf107d0e17
   const [newComment, setNewComment] = useState('')
 
   const handleSubmit = () => {
@@ -11,12 +15,17 @@ const CommentSection = ({ comments = [], onAddComment, currentUser }) => {
     }
   }
 
+<<<<<<< HEAD
   // currentUser가 없는 경우 기본값 설정
   const userAvatar = currentUser 
     ? `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=random`
     : 'https://ui-avatars.com/api/?name=Guest&background=random'
   
   const userName = currentUser?.username || '게스트'
+=======
+  // 현재 사용자 정보 (기본값 설정)
+  const user = currentUser || { name: '사용자', avatar: 'https://ui-avatars.com/api/?name=User&background=random' }
+>>>>>>> be9337ba9e7ad4e919d0fecc52ff8fbf107d0e17
 
   return (
     <div className="bg-white rounded-2xl shadow-md p-6">
@@ -27,8 +36,13 @@ const CommentSection = ({ comments = [], onAddComment, currentUser }) => {
       {/* Comment Input */}
       <div className="flex gap-3 mb-6">
         <img
+<<<<<<< HEAD
           src={userAvatar}
           alt={userName}
+=======
+          src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`}
+          alt={user.username}
+>>>>>>> be9337ba9e7ad4e919d0fecc52ff8fbf107d0e17
           className="h-10 w-10 rounded-full"
         />
         <div className="flex-1">
