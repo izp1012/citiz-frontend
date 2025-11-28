@@ -28,7 +28,7 @@ class ApiService {
 
     try {
       let response = await fetch(url, config)
-
+      
       if (response.status == 401) {
         console.warn("Access Token 만료됨 → Refresh 시도")
 
@@ -52,18 +52,20 @@ class ApiService {
         response = await fetch(url, config)
       }
 
+      const contentType = response.headers.get("content-type") || ""
+      const raw = await response.text()
+      let parsed = raw
+      if (contentType.includes("application/json")) {
+        parsed = JSON.parse(raw)
+      }
+
       if (!response.ok) {
         // 토큰 재발급 후 요청에 대한 오류 발생시
-        const errorData = await response.json().catch(() => ({}))
+        const errorData = parsed.catch(() => ({}))
         throw new Error(errorData.msg || `HTTP error! status: ${response.status}`)
       }
 
-      const contentType = response.headers.get('content-type')
-      if (contentType && contentType.includes('application/json')) {
-        return response.json()
-      } else {
-        return response.text()
-      }
+      return parsed
 
     } catch (error) {
       console.error(`API request failed for ${endpoint}:`, error)
