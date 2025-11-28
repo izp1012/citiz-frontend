@@ -6,6 +6,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL
+    this.isRefreshing = false
+    this.pendingRequests = []
   }
 
   async request(endpoint, options = {}) {
@@ -25,22 +27,92 @@ class ApiService {
     }
 
     try {
-      const response = await fetch(url, config)
-      
+      let response = await fetch(url, config)
+
+      if (response.status == 401) {
+        console.warn("Access Token 만료됨 → Refresh 시도")
+
+        const newToken = await this.refreshToken()
+
+        if (!newToken) {
+          console.error("Refresh 실패 → 강제 로그아웃")
+          useAuthStore.getState().logout()
+          window.location.href = '/'
+          return
+        }
+
+        console.log("새 Access Token으로 요청 재시도")
+
+        // 재요청 (토큰 교체 포함)
+        config.headers = {
+          ...config.headers,
+          Authorization: `Bearer ${newToken}`,
+        }
+
+        response = await fetch(url, config)
+      }
+
       if (!response.ok) {
+        // 토큰 재발급 후 요청에 대한 오류 발생시
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.msg || `HTTP error! status: ${response.status}`)
       }
 
       const contentType = response.headers.get('content-type')
       if (contentType && contentType.includes('application/json')) {
-        return await response.json()
+        return response.json()
       } else {
-        return await response.text()
+        return response.text()
       }
+
     } catch (error) {
       console.error(`API request failed for ${endpoint}:`, error)
       throw error
+    }
+  }
+
+  // 토큰 재발급 요청 API
+  async refreshToken() {
+    const { token, setToken, logout } = useAuthStore.getState()
+
+    // 이미 refresh 중이면 → 대기 후 해결
+    if (this.isRefreshing) {
+      return new Promise(resolve => {
+        this.pendingRequests.push(resolve)
+      })
+    }
+
+    this.isRefreshing = true
+
+    try {
+      const ref_response = await fetch(`${this.baseURL}/users/login-extension`, {
+        method: 'POST',
+        credentials: 'include', //HttpOnly 쿠키 포함 필수
+      })
+
+      if (!ref_response.ok) throw new Error('Refresh failed')
+
+      const data = await ref_response.json()
+      const newAccessToken = data?.data || null
+
+      if (!newAccessToken) throw new Error("No token in refresh response")
+
+      // 새로운 Access Token 저장
+      setToken(newAccessToken)
+
+      console.log("Access Token 재발급 성공:", newAccessToken)
+
+      // 대기 중이던 요청들 모두 처리
+      this.pendingRequests.forEach(resolve => resolve(newAccessToken))
+      this.pendingRequests = []
+
+      return newAccessToken
+    } catch (err) {
+      console.error("Refresh Token 만료 → 로그아웃해야 함")
+      logout()
+      return null
+    } finally {
+      this.isRefreshing = false
     }
   }
 
@@ -123,7 +195,7 @@ class ApiService {
     })
   }
 
-
+  
 
   // Error handler for common API errors
   handleError(error) {

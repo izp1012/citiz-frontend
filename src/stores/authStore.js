@@ -16,6 +16,7 @@ export const useAuthStore = create(
           // ✅ 실제 Spring 서버로 로그인 요청 보내기
           const response = await fetch(`${API_BASE_URL}/users/login`, {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: username, password }),
           })
@@ -75,6 +76,9 @@ export const useAuthStore = create(
         const user = get().user
         return user ? { 'User-Id': user.id } : {}
       },
+      setToken: (newToken) => {
+        set({ token: newToken })
+      }
     }),
     {
       name: 'auth-storage',
