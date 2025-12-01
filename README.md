@@ -95,6 +95,7 @@ cp .env.example .env
 
 `.env` 파일을 편집하여 백엔드 서버 정보를 설정하세요:
 ```env
+VITE_IMG_BASE_URL=http://localhost:8080
 VITE_API_BASE_URL=http://localhost:8080/api
 VITE_WS_BASE_URL=http://localhost:8080/ws/chat
 ```
