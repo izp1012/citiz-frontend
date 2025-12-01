@@ -16,10 +16,6 @@ const PostCreatePage = () => {
   const [images, setImages] = useState([])
   const [loading, setLoading] = useState(false)
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
   const handleAddTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput)) {
       setTags([...tags, tagInput])
@@ -36,27 +32,7 @@ const PostCreatePage = () => {
     setImages([...images, ...previewFiles])
   }
 
-  //apiservice.uploadFile
-  const uploadImages = async () => {
-    if (images.length === 0) return []
-
-    const formData = new FormData()
-    images.forEach(img => formData.append("files", img.file))
-
-    const response = await fetch("/posts/upload", {   // 업로드 엔드포인트 필요
-      method: "POST",
-      body: formData
-    })
-
-    if (!response.ok) throw new Error("이미지 업로드 실패")
-
-    const imgUrls = await response.json()
-    return imgUrls // ["url1", "url2", ...]
-  }
-
-  
-
-  // 🔥 최종 POST /posts 호출
+  // ⭐ FormData로 게시글 + 이미지 한 번에 전송
   const handleSubmit = async () => {
     if (!title.trim() || !content.trim()) {
       alert("제목과 내용을 입력해주세요!")
@@ -66,21 +42,26 @@ const PostCreatePage = () => {
     setLoading(true)
 
     try {
-      // 👉 1) 이미지 업로드 후 URL 배열 받기
-      const imgUrls = await uploadImages()
+      // FormData 객체 생성
+      const formData = new FormData()
 
-      // 👉 2) PostReqDto 구조에 맞춰 JSON 생성
-      const reqBody = {
-        profileId: id, // TODO: 로그인한 사용자 프로필 ID로 변경
-        postId: null,
-        title: title,
-        content: content,
-        imgUrls: imgUrls,
-        tagIds: tags
-      }
+      // 기본 텍스트 데이터 추가
+      formData.append("profileId", id)
+      formData.append("title", title)
+      formData.append("content", content)
+
+      // 태그 배열
+      tags.forEach(tag => formData.append("tagIds", tag))
+
+      // 이미지 파일들 추가
+      images.forEach(img => {
+        formData.append("images", img.file)
+      })
+
+      // API 호출
       const response = await apiService.request('/posts', {
         method: 'POST',
-        body: JSON.stringify(reqBody)
+        body: formData,
       })
 
       if (response.code != 1) throw new Error("게시글 저장 실패")
@@ -109,7 +90,6 @@ const PostCreatePage = () => {
             placeholder="공간의 제목을 입력해주세요"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            
             className="w-full p-3 border rounded-lg"
           />
         </div>
