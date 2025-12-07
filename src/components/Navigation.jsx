@@ -12,6 +12,10 @@ const Navigation = () => {
     navigate('/login')
   }
 
+  const handleGoProfile = () => {
+    navigate('/profile')
+  }
+
   const navLinks = [
     {
       to: '/',
@@ -62,17 +66,21 @@ const Navigation = () => {
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3">
+            <button
+              type="button"
+              onClick={handleGoProfile}
+              className="flex items-center space-x-3 hover:bg-gray-50 px-2 py-1 rounded-lg transition"
+            >
               <img
                 src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.username}&background=3b82f6&color=fff`}
                 alt={user?.username}
                 className="h-8 w-8 rounded-full"
               />
-              <div className="hidden sm:block">
+              <div className="hidden sm:block text-left leading-tight">
                 <p className="text-sm font-medium text-gray-900">{user?.username}</p>
                 <p className="text-xs text-gray-500">{user?.email}</p>
               </div>
-            </div>
+            </button>
 
             <button
               onClick={handleLogout}
