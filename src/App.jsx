@@ -11,6 +11,7 @@ import RegisterPage from './pages/RegisterPage.jsx'
 import PostCreatePage from './pages/PostCreatePage.jsx'
 import PostDetailPage from './pages/PostDetailPage.jsx'
 import PostUpdatePage from './pages/PostUpdatePage.jsx'
+import ProfilePage from './pages/ProfilePage.jsx'
 
 function App() {
   const { isAuthenticated } = useAuthStore()
@@ -54,6 +55,7 @@ function App() {
             <Route path="/post/:postId" element={<PostDetailPage />}/>
             <Route path="/post/edit/:postId" element={<PostUpdatePage />}/>
             <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/profile" element={<ProfilePage />} /> 
           </Routes>
         </main>
       </div>
