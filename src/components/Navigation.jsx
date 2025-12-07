@@ -1,5 +1,5 @@
 import React from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../stores/authStore'
 import { MessageCircle, Home, MessageSquare, LogOut, User } from 'lucide-react'
 
@@ -30,12 +30,12 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2">
             <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <MessageCircle className="h-5 w-5 text-white" />
             </div>
             <span className="text-xl font-bold text-gray-900">Citiz</span>
-          </div>
+          </Link>
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
@@ -64,13 +64,13 @@ const Navigation = () => {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
               <img
-                src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name}&background=3b82f6&color=fff`}
-                alt={user?.name}
+                src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.username}&background=3b82f6&color=fff`}
+                alt={user?.username}
                 className="h-8 w-8 rounded-full"
               />
               <div className="hidden sm:block">
-                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                <p className="text-xs text-gray-500">@{user?.username}</p>
+                <p className="text-sm font-medium text-gray-900">{user?.username}</p>
+                <p className="text-xs text-gray-500">{user?.email}</p>
               </div>
             </div>
 

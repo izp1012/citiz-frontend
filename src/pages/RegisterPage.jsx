@@ -31,25 +31,6 @@ const RegisterPage = () => {
       setPreview(URL.createObjectURL(file))
     }
   }
-
-  // 🔥 1) 프로필 이미지 먼저 업로드 → URL 받기
-  const uploadProfileImage = async (file) => {
-    if (!file) return null
-
-    const imgForm = new FormData()
-    imgForm.append("file", file)
-
-    // 필요 시 업로드 경로 수정 (지금은 /upload/profile)
-    const response = await apiService.request('/upload/profile', {
-      method: 'POST',
-      body: imgForm
-    })
-
-    // 서버가 URL을 문자열로 반환한다고 가정
-    const url = await response.text()
-    return url
-  }
-
   // 🔥 2) 회원가입(JSON) 요청
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -58,25 +39,21 @@ const RegisterPage = () => {
     setSuccess('')
 
     try {
-      // 1) 이미지 업로드 후 URL 받기
-      let profileImageUrl = null
+      const form = new FormData()
+
+      // text 데이터 추가
+      form.append("email", formData.email)
+      form.append("name", formData.name)
+      form.append("password", formData.password)
+  
+      // 파일 추가
       if (formData.profileImage) {
-        profileImageUrl = await uploadProfileImage(formData.profileImage)
+        form.append("profileImage", formData.profileImage)
       }
-
-      // 2) JSON Body 구성 — @RequestBody로 받을 수 있음
-      const requestBody = {
-        email: formData.email,
-        name: formData.name,
-        password: formData.password,
-        profileImage: profileImageUrl
-      }
-
-      // 3) 실제 회원가입 요청
-      await apiService.request('/users', {
+  
+      const res = await apiService.request('/users', {
         method: 'POST',
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody)
+        body: form 
       })
 
       setSuccess('회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.')
