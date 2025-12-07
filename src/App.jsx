@@ -9,6 +9,8 @@ import Navigation from './components/Navigation.jsx'
 import './styles/globals.css'
 import RegisterPage from './pages/RegisterPage.jsx'
 import PostCreatePage from './pages/PostCreatePage.jsx'
+import PostDetailPage from './pages/PostDetailPage.jsx'
+import PostUpdatePage from './pages/PostUpdatePage.jsx'
 
 function App() {
   const { isAuthenticated } = useAuthStore()
@@ -49,6 +51,8 @@ function App() {
               element={<RegisterPage />} 
             /> 
             <Route path="/post/new" element={<PostCreatePage />} />
+            <Route path="/post/:postId" element={<PostDetailPage />}/>
+            <Route path="/post/edit/:postId" element={<PostUpdatePage />}/>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
