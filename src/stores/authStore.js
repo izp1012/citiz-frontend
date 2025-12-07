@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL || 'http://localhost:8080/images/'
 // const API_BASE_URL =  'http://localhost:8080/api'
 
 export const useAuthStore = create(
@@ -30,7 +31,8 @@ export const useAuthStore = create(
               id: data.data.id,
               username: data.data.name,
               email: data.data.email,
-              avatar: `https://ui-avatars.com/api/?name=${username}&background=3b82f6&color=fff`,
+              // avatar: `https://ui-avatars.com/api/?name=${username}&background=3b82f6&color=fff`,
+              avatar: `${IMAGE_BASE_URL}${data.data.imgUrl}`
             }
       
             set({

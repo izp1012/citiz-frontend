@@ -38,9 +38,9 @@ const PostCreatePage = () => {
       alert("제목과 내용을 입력해주세요!")
       return
     }
-
+  
     setLoading(true)
-
+  
     try {
       // FormData 객체 생성
       const formData = new FormData()
@@ -63,13 +63,13 @@ const PostCreatePage = () => {
         method: 'POST',
         body: formData,
       })
-
-      if (response.code != 1) throw new Error("게시글 저장 실패")
-
+  
+      if (response.code !== 1) throw new Error("게시글 저장 실패")
+  
       alert("게시글이 등록되었습니다!")
       navigate("/")
-    } catch (e) {
-      console.error(e)
+    } catch (err) {
+      console.error(err)
       alert("오류가 발생했습니다.")
     } finally {
       setLoading(false)
