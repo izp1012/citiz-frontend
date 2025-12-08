@@ -32,7 +32,7 @@ export const useAuthStore = create(
               username: data.data.name,
               email: data.data.email,
               // avatar: `https://ui-avatars.com/api/?name=${username}&background=3b82f6&color=fff`,
-              avatar: `${IMAGE_BASE_URL}/${data.data.imgUrl}`
+              avatar: data.data.imgUrl ? `${IMAGE_BASE_URL}/${data.data.imgUrl}` : ''
             }
       
             set({
